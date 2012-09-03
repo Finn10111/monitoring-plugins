@@ -29,6 +29,7 @@ __maintainer__ = "Finn Christiansen"
 __email__ = "kontakt@finnchristiansen.de"
 __status__ = "Development"
 
+
 import sys
 import re
 import os
@@ -36,9 +37,11 @@ import shelve
 import time
 import argparse
 
+
 class Usage(Exception):
 	def __init__(self, msg):
 		self.msg = msg
+
  
 def main():
 	parser = argparse.ArgumentParser(description = 'Nagios check for traffic usage')
@@ -46,6 +49,7 @@ def main():
 	args = parser.parse_args()
 	if args.device is not None:
 		doCheck(args.device)
+
 
 def getDevData(device):
 	infile = open('/proc/net/dev', 'r')
@@ -60,6 +64,7 @@ def getDevData(device):
 		return devData
 	else:
 		return False
+
 	
 def processData(device, devData):
 	trafficDataPath = '/tmp/check_traffic_'+device
@@ -107,6 +112,7 @@ def processData(device, devData):
 		trafficDataFile['trafficData'] = trafficData
 		trafficDataFile.close()
 	return trafficData
+
 	
 def doCheck(device):
 	devData = getDevData(device)
@@ -126,9 +132,6 @@ def doCheck(device):
 	print(textOutput)
 	return returnCode
 
+
 if __name__ == '__main__':
 	sys.exit(main())
-
-
-	 
-

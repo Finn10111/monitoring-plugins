@@ -1,7 +1,34 @@
-#!/usr/bin/python
-""" Description...
-..................
-.................."""
+#!/usr/bin/env python
+"""
+    check_python.py - simple nagios plugin to check traffic on linux hosts
+    Copyright (C) <2012>  <Finn Christiansen>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+""" This is a small nagios plugin used for checking or watching the traffic on linux host by reading /proc/dev/net and storing information in a file
+to calculate the average and total traffic. Currently it can be only used to get performance data, warning and critial values will be added soon."""
+
+
+__author__ = "Finn Christiansen"
+__copyright__ = "Copyright 2012, Finn Christiansen"
+__credits__ = ["Finn Christiansen"]
+__license__ = "GPL"
+__version__ = "3"
+__maintainer__ = "Finn Christiansen"
+__email__ = "kontakt@finnchristiansen.de"
+__status__ = "Development"
+
 import sys
 import re
 import os

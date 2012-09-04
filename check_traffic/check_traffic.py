@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
     check_python.py - simple nagios plugin to check traffic on linux hosts
-    Copyright (C) <2012>  <Finn Christiansen>
+    Copyright (C) 2012 Finn Christiansen
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,9 +15,13 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+This is a small nagios plugin used for checking or watching the traffic on
+linux host by reading /proc/dev/net and storing information in a file
+to calculate the average and total traffic. Currently it can be only used 
+to get performance data, warning and critial values will be added soon.
+
 """
-""" This is a small nagios plugin used for checking or watching the traffic on linux host by reading /proc/dev/net and storing information in a file
-to calculate the average and total traffic. Currently it can be only used to get performance data, warning and critial values will be added soon."""
 
 
 __author__ = "Finn Christiansen"
@@ -49,6 +53,8 @@ def main():
 	args = parser.parse_args()
 	if args.device is not None:
 		doCheck(args.device)
+	else:
+		return 2
 
 
 def getDevData(device):

@@ -48,14 +48,18 @@ class Usage(Exception):
 
  
 def main():
+	statusCodes = {'OK': 0, 'WARNING': 1, 'CRITICAL': 2, 'UNKNOWN': 3}
 	parser = argparse.ArgumentParser(description = 'Nagios check for traffic usage')
 	parser.add_argument('-d', '--device', required=True)
 	args = parser.parse_args()
+	
 	if args.device is not None:
-		doCheck(args.device)
+		output = doCheck(args.device)
 	else:
-		return 2
-
+		output = ['UNKNOWN', 'no device given']
+	print(output[0] + " - " + output[1])
+	return statusCodes[output[0]]
+	
 
 def getDevData(device):
 	infile = open('/proc/net/dev', 'r')
@@ -122,21 +126,20 @@ def processData(device, devData):
 	
 def doCheck(device):
 	devData = getDevData(device)
-	trafficData = processData(device, devData)
 
 	if devData is not False:
-		textOutput = str("OK - device " + device + " |" +  
+		trafficData = processData(device, devData)
+		textOutput = str("device " + device + " |" +  
 				" avgBytesRX=" + str(trafficData['avgBytesRX']) +
 				" avgBytesTX=" + str(trafficData['avgBytesTX']) +
 				" totalBytesRX=" + str(trafficData['totalBytesRX']) +
 				" totalBytesTX=" + str(trafficData['totalBytesTX']) 
 				)
-		returnCode = 0
+		statusCode = 'OK'
 	else:
-		textOutput = 'CRITICAL - device ' + device + ' not found'
-		returnCode = 2
-	print(textOutput)
-	return returnCode
+		textOutput = 'device ' + device + ' not found'
+		statusCode = 'UNKNOWN'
+	return [statusCode, textOutput]
 
 
 if __name__ == '__main__':

@@ -73,7 +73,7 @@ def getDevData(device):
 
 	
 def processData(device, devData):
-	trafficDataPath = '/tmp/check_traffic_'+device
+	trafficDataPath = '/tmp/check_local_traffic_'+device
 	if os.path.isfile(trafficDataPath):
 		trafficDataFile = shelve.open(trafficDataPath)
 		trafficData = trafficDataFile['trafficData']
@@ -93,16 +93,12 @@ def processData(device, devData):
 			diffBytesTX = (currBytesTX - int(trafficData['lastBytesTX'])) 
 			avgBytesRX = int( diffBytesRX / deltaTime)
 			avgBytesTX = int( diffBytesTX / deltaTime)
-		totalBytesRX = int(trafficData['totalBytesRX']) + diffBytesRX
-		totalBytesTX = int(trafficData['totalBytesTX']) + diffBytesTX
 		
 		
 		trafficData['avgBytesRX'] = avgBytesRX
 		trafficData['lastBytesRX'] = currBytesRX
 		trafficData['avgBytesTX'] = avgBytesTX
 		trafficData['lastBytesTX'] = currBytesTX
-		trafficData['totalBytesRX'] = totalBytesRX
-		trafficData['totalBytesTX'] = totalBytesTX
 		trafficData['timeLastCheck'] = time.time() 
 		trafficDataFile['trafficData'] = trafficData
 		trafficDataFile.close()
@@ -112,8 +108,6 @@ def processData(device, devData):
 					lastBytesRX = 0, 
 					avgBytesTX = 0, 
 					lastBytesTX = 0,
-					totalBytesRX = 0, 
-					totalBytesTX = 0, 
 					timeLastCheck = time.time() )
 		trafficDataFile['trafficData'] = trafficData
 		trafficDataFile.close()
@@ -127,10 +121,7 @@ def doCheck(device):
 	if devData is not False:
 		textOutput = str("OK - device " + device + " |" +  
 				" avgBytesRX=" + str(trafficData['avgBytesRX']) +
-				" avgBytesTX=" + str(trafficData['avgBytesTX']) +
-				" totalBytesRX=" + str(trafficData['totalBytesRX']) +
-				" totalBytesTX=" + str(trafficData['totalBytesTX']) 
-				)
+				" avgBytesTX=" + str(trafficData['avgBytesTX'])	)
 		returnCode = 0
 	else:
 		textOutput = 'CRITICAL - device ' + device + ' not found'

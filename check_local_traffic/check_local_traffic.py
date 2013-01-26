@@ -119,7 +119,10 @@ def doCheck(device):
 	trafficData = processData(device, devData)
 
 	if devData is not False:
-		textOutput = str("OK - device " + device + " |" +  
+		textOutput = str("OK - device " + device + " " + 
+				" avgBytesRX " + str(trafficData['avgBytesRX']) +
+				" avgBytesTX " + str(trafficData['avgBytesTX']) +
+				" |" +  
 				" avgBytesRX=" + str(trafficData['avgBytesRX']) +
 				" avgBytesTX=" + str(trafficData['avgBytesTX'])	)
 		returnCode = 0

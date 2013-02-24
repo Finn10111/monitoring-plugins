@@ -35,7 +35,7 @@ fi
 if [ $TEMP -lt 0 ]; then
 	RETURNCODE=3
 	STATUSMSG=UNKNOWN
-	unset $TEMP
+	$TEMP=0
 fi
 
 echo "$STATUSMSG: Temperature $TEMP °C, CPU Frequency $CPU | temp=$TEMP;$TEMPWARN;$TEMPCRIT cpu=$CPU"

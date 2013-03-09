@@ -54,7 +54,7 @@ def main():
 
 def processData(device):
 	trafficDataPath = '/tmp/check_local_traffic_'+device
-	trafficStatsPath = '/sys/class/net/eth0/statistics/'
+	trafficStatsPath = '/sys/class/net/%s/statistics/' % device
 	if os.path.isfile(trafficDataPath):
 		trafficDataFile = shelve.open(trafficDataPath)
 		trafficData = trafficDataFile['trafficData']
@@ -111,6 +111,8 @@ def doCheck(device):
 		returnCode = 2
 	print(textOutput)
 	return returnCode
+
+
 
 
 if __name__ == '__main__':

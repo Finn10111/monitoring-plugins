@@ -42,11 +42,6 @@ import time
 import argparse
 
 
-class Usage(Exception):
-	def __init__(self, msg):
-		self.msg = msg
-
- 
 def main():
 	parser = argparse.ArgumentParser(description = 'Nagios check for traffic usage')
 	parser.add_argument('-d', '--device', required=True)

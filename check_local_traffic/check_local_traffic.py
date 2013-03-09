@@ -52,29 +52,15 @@ def main():
 		return 2
 
 
-def getDevData(device):
-	infile = open('/proc/net/dev', 'r')
-	devData = None	
-	for line in infile:
-		if re.match('.*' + device + ':.*', line):
-			devData = re.sub('\:', ' ',  line)
-	infile.close()
-	if devData is not None:
-		devData = re.sub('\s{2,}', ' ', devData.strip()).split(' ')
-		devData.append(int(time.time()))
-		return devData
-	else:
-		return False
-
-	
-def processData(device, devData):
+def processData(device):
 	trafficDataPath = '/tmp/check_local_traffic_'+device
+	trafficStatsPath = '/sys/class/net/eth0/statistics/'
 	if os.path.isfile(trafficDataPath):
 		trafficDataFile = shelve.open(trafficDataPath)
 		trafficData = trafficDataFile['trafficData']
 		deltaTime = time.time() - trafficData['timeLastCheck']
-		currBytesRX = int(devData[1])
-		currBytesTX = int(devData[9])
+		currBytesRX = int(open('%srx_bytes' % trafficStatsPath).read())
+		currBytesTX = int(open('%stx_bytes' % trafficStatsPath).read())
 		if	trafficData['lastBytesRX'] >= currBytesRX or \
 			trafficData['lastBytesTX'] >= currBytesTX or \
 			trafficData['lastBytesRX'] == 0 or \
@@ -110,10 +96,9 @@ def processData(device, devData):
 
 	
 def doCheck(device):
-	devData = getDevData(device)
-	trafficData = processData(device, devData)
+	trafficData = processData(device)
 
-	if devData is not False:
+	if trafficData is not False:
 		textOutput = str("OK - device " + device + " " + 
 				" avgBytesRX " + str(trafficData['avgBytesRX']) +
 				" avgBytesTX " + str(trafficData['avgBytesTX']) +

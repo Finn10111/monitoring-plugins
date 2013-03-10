@@ -42,6 +42,40 @@ import time
 import argparse
 
 
+class PluginData:
+	def __init__(self, device):
+		self.storePath = '/tmp/check_local_traffic_%s' % device
+		self.statsPath = '/sys/class/net/%s/statistics/' % device
+		self.values = ['collisions', 'multicast', 'rx_bytes', 'rx_compressed', 'rx_crc_errors', 'rx_dropped', 'rx_errors', 'rx_fifo_errors', 'rx_frame_errors', 'rx_length_errors', 'rx_missed_errors', 'rx_over_errors', 'rx_packets', 'tx_aborted_errors', 'tx_bytes', 'tx_carrier_errors', 'tx_compressed', 'tx_dropped', 'tx_errors', 'tx_fifo_errors', 'tx_heartbeat_errors', 'tx_packets', 'tx_window_errors']
+		if not os.path.isfile(self.storePath):
+			self.getData()
+			self.setData()
+
+	def initData(self):
+		self.data = dict()
+		for key in self.values:
+			self.data[key] = int(open('%s%s' % (self.statsPath, key)).read())
+		self.data['timeLastCheck'] = time.time() 
+		
+	def getData(self):
+		self.data = dict()
+		for key in self.values:
+			self.data[key] = int(open('%s%s' % (self.statsPath, key)).read())
+		self.data['timeLastCheck'] = time.time() 
+		return self.data
+	
+	def setData(self):
+		pluginStore = shelve.open(self.storePath)
+		pluginStore['pluginData'] = self.data
+		pluginStore.close()
+		return True
+
+	def getStoredData(self):
+		pluginDataFile = shelve.open(self.storePath)
+		pluginData = pluginDataFile['pluginData']
+		pluginDataFile.close()
+		return pluginData
+
 def main():
 	parser = argparse.ArgumentParser(description = 'Nagios check for traffic usage')
 	parser.add_argument('-d', '--device', required=True)
@@ -53,86 +87,32 @@ def main():
 
 
 def processData(device):
-	trafficDataPath = '/tmp/check_local_traffic_'+device
-	# look if plugin storage file exists
-	if os.path.isfile(trafficDataPath):
-		trafficDataFile = shelve.open(trafficDataPath)
-		trafficData = trafficDataFile['trafficData']
-		deltaTime = time.time() - trafficData['timeLastCheck']
-		trafficStats = getTrafficStats(device)
-		currBytesRX = trafficStats['rx_bytes']
-		currBytesTX = trafficStats['tx_bytes']
-		
-		# if last value seems incorrect, can happen after reboot
-		if	trafficData['lastBytesRX'] >= currBytesRX or \
-			trafficData['lastBytesTX'] >= currBytesTX or \
-			trafficData['lastBytesRX'] == 0 or \
-			trafficData['lastBytesTX'] == 0:
-			avgBytesRX = 0
-			avgBytesTX = 0
-			diffBytesRX = 0
-			diffBytesTX = 0
-		else:
-			diffBytesRX = (currBytesRX - int(trafficData['lastBytesRX'])) 
-			diffBytesTX = (currBytesTX - int(trafficData['lastBytesTX'])) 
-			avgBytesRX = int( diffBytesRX / deltaTime)
-			avgBytesTX = int( diffBytesTX / deltaTime)
-		
-		
-		trafficData['avgBytesRX'] = avgBytesRX
-		trafficData['lastBytesRX'] = currBytesRX
-		trafficData['avgBytesTX'] = avgBytesTX
-		trafficData['lastBytesTX'] = currBytesTX
-		trafficData['timeLastCheck'] = time.time() 
-		trafficDataFile['trafficData'] = trafficData
-		trafficDataFile.close()
-	# plugin runs for the first time
+	trafficData = PluginData(device)
+	trafficDataOld = trafficData.getStoredData()
+	trafficDataNew = trafficData.getData()
+	deltaTime = time.time() - trafficDataOld['timeLastCheck']
+	# if last value seems incorrect, can happen after reboot
+	if	trafficDataOld['rx_bytes'] >= trafficDataNew['rx_bytes'] or \
+		trafficDataOld['tx_bytes'] >= trafficDataNew['tx_bytes'] or \
+		trafficDataOld['rx_bytes'] == 0 or \
+		trafficDataOld['tx_bytes'] == 0:
+		avgBytesRX = 0
+		avgBytesTX = 0
+		diffBytesRX = 0
+		diffBytesTX = 0
 	else:
-		trafficDataFile = shelve.open(trafficDataPath)
-		trafficData = dict(	avgBytesRX = 0,
-					lastBytesRX = 0, 
-					avgBytesTX = 0, 
-					lastBytesTX = 0,
-					timeLastCheck = time.time() )
-		trafficDataFile['trafficData'] = trafficData
-		trafficDataFile.close()
-	return trafficData
+		diffBytesRX = (trafficDataNew['rx_bytes'] - int(trafficDataOld['rx_bytes'])) 
+		diffBytesTX = (trafficDataNew['tx_bytes'] - int(trafficDataOld['tx_bytes'])) 
+		avgBytesRX = int( diffBytesRX / deltaTime)
+		avgBytesTX = int( diffBytesTX / deltaTime)
+	
+	trafficDataOutput = dict()	
+	trafficDataOutput['avgBytesRX'] = avgBytesRX
+	trafficDataOutput['avgBytesTX'] = avgBytesTX
+	trafficData.setData()
+	return trafficDataOutput
 
 
-def getTrafficStats(device):
-	trafficStatsPath = '/sys/class/net/%s/statistics/' % device
-	if os.path.isdir(trafficStatsPath):
-		output = dict(collisions='',
-			multicast='',
-			rx_bytes='',
-			rx_compressed='',
-			rx_crc_errors='',
-			rx_dropped='',
-			rx_errors='',
-			rx_fifo_errors='',
-			rx_frame_errors='',
-			rx_length_errors='',
-			rx_missed_errors='',
-			rx_over_errors='',
-			rx_packets='',
-			tx_aborted_errors='',
-			tx_bytes='',
-			tx_carrier_errors='',
-			tx_compressed='',
-			tx_dropped='',
-			tx_errors='',
-			tx_fifo_errors='',
-			tx_heartbeat_errors='',
-			tx_packets='',
-			tx_window_errors=''
-			)
-		for key in output.keys():
-			output[key] = int(open('%s%s' % (trafficStatsPath, key)).read())		
-		exitCode = 0
-	else:
-		output = 'Can\'t find %s' %trafficStatsPath
-
-	return output	
 
 def doCheck(device):
 	trafficData = processData(device)

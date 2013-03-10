@@ -25,7 +25,7 @@ to get performance data, warning and critial values will be added soon.
 
 
 __author__ = "Finn Christiansen"
-__copyright__ = "Copyright 2012, Finn Christiansen"
+__copyright__ = "Copyright 2012-2013, Finn Christiansen"
 __credits__ = ["Finn Christiansen"]
 __license__ = "GPL"
 __version__ = "3"
@@ -54,13 +54,16 @@ def main():
 
 def processData(device):
 	trafficDataPath = '/tmp/check_local_traffic_'+device
-	trafficStatsPath = '/sys/class/net/%s/statistics/' % device
+	# look if plugin storage file exists
 	if os.path.isfile(trafficDataPath):
 		trafficDataFile = shelve.open(trafficDataPath)
 		trafficData = trafficDataFile['trafficData']
 		deltaTime = time.time() - trafficData['timeLastCheck']
-		currBytesRX = int(open('%srx_bytes' % trafficStatsPath).read())
-		currBytesTX = int(open('%stx_bytes' % trafficStatsPath).read())
+		trafficStats = getTrafficStats(device)
+		currBytesRX = trafficStats['rx_bytes']
+		currBytesTX = trafficStats['tx_bytes']
+		
+		# if last value seems incorrect, can happen after reboot
 		if	trafficData['lastBytesRX'] >= currBytesRX or \
 			trafficData['lastBytesTX'] >= currBytesTX or \
 			trafficData['lastBytesRX'] == 0 or \
@@ -83,6 +86,7 @@ def processData(device):
 		trafficData['timeLastCheck'] = time.time() 
 		trafficDataFile['trafficData'] = trafficData
 		trafficDataFile.close()
+	# plugin runs for the first time
 	else:
 		trafficDataFile = shelve.open(trafficDataPath)
 		trafficData = dict(	avgBytesRX = 0,
@@ -94,7 +98,42 @@ def processData(device):
 		trafficDataFile.close()
 	return trafficData
 
-	
+
+def getTrafficStats(device):
+	trafficStatsPath = '/sys/class/net/%s/statistics/' % device
+	if os.path.isdir(trafficStatsPath):
+		output = dict(collisions='',
+			multicast='',
+			rx_bytes='',
+			rx_compressed='',
+			rx_crc_errors='',
+			rx_dropped='',
+			rx_errors='',
+			rx_fifo_errors='',
+			rx_frame_errors='',
+			rx_length_errors='',
+			rx_missed_errors='',
+			rx_over_errors='',
+			rx_packets='',
+			tx_aborted_errors='',
+			tx_bytes='',
+			tx_carrier_errors='',
+			tx_compressed='',
+			tx_dropped='',
+			tx_errors='',
+			tx_fifo_errors='',
+			tx_heartbeat_errors='',
+			tx_packets='',
+			tx_window_errors=''
+			)
+		for key in output.keys():
+			output[key] = int(open('%s%s' % (trafficStatsPath, key)).read())		
+		exitCode = 0
+	else:
+		output = 'Can\'t find %s' %trafficStatsPath
+
+	return output	
+
 def doCheck(device):
 	trafficData = processData(device)
 

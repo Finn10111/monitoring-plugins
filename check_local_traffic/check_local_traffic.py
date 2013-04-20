@@ -59,8 +59,11 @@ class PluginData:
 		
 	def getData(self):
 		self.data = dict()
-		for key in self.values:
-			self.data[key] = int(open('%s%s' % (self.statsPath, key)).read())
+		try:
+			for key in self.values:
+				self.data[key] = int(open('%s%s' % (self.statsPath, key)).read())
+		except FileNotFoundError as e:
+			return False	
 		self.data['timeLastCheck'] = time.time() 
 		return self.data
 	
@@ -90,6 +93,9 @@ def processData(device):
 	trafficData = PluginData(device)
 	trafficDataOld = trafficData.getStoredData()
 	trafficDataNew = trafficData.getData()
+	if trafficDataNew is False:
+		return False
+
 	deltaTime = time.time() - trafficDataOld['timeLastCheck']
 	# if last value seems incorrect, can happen after reboot
 	if	trafficDataOld['rx_bytes'] >= trafficDataNew['rx_bytes'] or \
@@ -126,8 +132,8 @@ def doCheck(device):
 				" avgBytesTX=" + str(trafficData['avgBytesTX'])	)
 		returnCode = 0
 	else:
-		textOutput = 'CRITICAL - device ' + device + ' not found'
-		returnCode = 2
+		textOutput = 'UNKNOWN - device ' + device + ' not found'
+		returnCode = 3
 	print(textOutput)
 	return returnCode
 

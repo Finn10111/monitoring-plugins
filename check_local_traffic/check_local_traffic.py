@@ -84,9 +84,11 @@ def main():
 	parser.add_argument('-d', '--device', required=True)
 	args = parser.parse_args()
 	if args.device is not None:
-		doCheck(args.device)
+		returnCode = doCheck(args.device)
 	else:
-		return 2
+		returnCode = 3
+
+	return returnCode
 
 
 def processData(device):
@@ -124,7 +126,7 @@ def doCheck(device):
 	trafficData = processData(device)
 
 	if trafficData is not False:
-		textOutput = str("OK - device " + device + " " + 
+		textOutput = str("OK - device " + device + " "  
 				" avgBytesRX " + str(trafficData['avgBytesRX']) +
 				" avgBytesTX " + str(trafficData['avgBytesTX']) +
 				" |" +  
@@ -134,6 +136,7 @@ def doCheck(device):
 	else:
 		textOutput = 'UNKNOWN - device ' + device + ' not found'
 		returnCode = 3
+
 	print(textOutput)
 	return returnCode
 

@@ -17,9 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 This is a small nagios plugin used for checking or watching the traffic on
-linux host by reading /proc/dev/net and storing information in a file
-to calculate the average and total traffic. Currently it can be only used 
-to get performance data, warning and critial values will be added soon.
+linux host by reading /sys/class/net/<device>/statistics/* and storing 
+information in a file to calculate the average and total traffic. 
+Currently it can be only used to get performance data, warning and critial 
+values will be added soon.
 
 """
 
@@ -62,7 +63,7 @@ class PluginData:
 		try:
 			for key in self.values:
 				self.data[key] = int(open('%s%s' % (self.statsPath, key)).read())
-		except FileNotFoundError as e:
+		except IOError as e:
 			return False	
 		self.data['timeLastCheck'] = time.time() 
 		return self.data
@@ -80,7 +81,7 @@ class PluginData:
 		return pluginData
 
 def main():
-	parser = argparse.ArgumentParser(description = 'Nagios check for traffic usage')
+	parser = argparse.ArgumentParser(description = 'Nagios plugin to check traffic usage')
 	parser.add_argument('-d', '--device', required=True)
 	args = parser.parse_args()
 	if args.device is not None:
@@ -139,7 +140,6 @@ def doCheck(device):
 
 	print(textOutput)
 	return returnCode
-
 
 
 

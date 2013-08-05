@@ -100,24 +100,19 @@ def processData(device):
 		return False
 
 	deltaTime = time.time() - trafficDataOld['timeLastCheck']
-	# if last value seems incorrect, can happen after reboot
-	if	trafficDataOld['rx_bytes'] >= trafficDataNew['rx_bytes'] or \
-		trafficDataOld['tx_bytes'] >= trafficDataNew['tx_bytes'] or \
+	trafficDataOutput = dict()	
+
+	# if last value seems incorrect... can happen after reboot
+	if	trafficDataOld['rx_bytes'] > trafficDataNew['rx_bytes'] or \
+		trafficDataOld['tx_bytes'] > trafficDataNew['tx_bytes'] or \
 		trafficDataOld['rx_bytes'] == 0 or \
 		trafficDataOld['tx_bytes'] == 0:
-		avgBytesRX = 0
-		avgBytesTX = 0
-		diffBytesRX = 0
-		diffBytesTX = 0
+		for key in trafficDataNew:
+			trafficDataOutput[key] = 0
 	else:
-		diffBytesRX = (trafficDataNew['rx_bytes'] - int(trafficDataOld['rx_bytes'])) 
-		diffBytesTX = (trafficDataNew['tx_bytes'] - int(trafficDataOld['tx_bytes'])) 
-		avgBytesRX = int( diffBytesRX / deltaTime)
-		avgBytesTX = int( diffBytesTX / deltaTime)
+		for key in trafficDataNew:
+			trafficDataOutput[key] = (int(trafficDataNew[key]) - int(trafficDataOld[key])) / deltaTime
 	
-	trafficDataOutput = dict()	
-	trafficDataOutput['avgBytesRX'] = avgBytesRX
-	trafficDataOutput['avgBytesTX'] = avgBytesTX
 	trafficData.setData()
 	return trafficDataOutput
 
@@ -127,12 +122,14 @@ def doCheck(device):
 	trafficData = processData(device)
 
 	if trafficData is not False:
-		textOutput = str("OK - device " + device + " "  
-				" avgBytesRX " + str(trafficData['avgBytesRX']) +
-				" avgBytesTX " + str(trafficData['avgBytesTX']) +
-				" |" +  
-				" avgBytesRX=" + str(trafficData['avgBytesRX']) +
-				" avgBytesTX=" + str(trafficData['avgBytesTX'])	)
+		outputString = "statistics read successfully"
+		perfdataString = ""
+		for key in sorted(trafficData):
+			if key != "timeLastCheck":
+				#outputString += "%s/s {0:.3f}, ".format(trafficData[key]) % key
+				perfdataString += "%s/s={0:.3f}; ".format(trafficData[key]) % key
+		textOutput = str("OK - " + device + " statistics read: \n")
+		textOutput += outputString.strip(', ') + " | " + perfdataString
 		returnCode = 0
 	else:
 		textOutput = 'UNKNOWN - device ' + device + ' not found'

@@ -122,12 +122,12 @@ def doCheck(device):
 	trafficData = processData(device)
 
 	if trafficData is not False:
-		outputString = ""
+		outputString = "statistics read successfully"
 		perfdataString = ""
 		for key in sorted(trafficData):
 			if key != "timeLastCheck":
-				outputString += "%s/s {:.3f}, ".format(trafficData[key]) % key
-				perfdataString += "%s/s={:.3f} ".format(trafficData[key]) % key
+				#outputString += "%s/s {0:.3f}, ".format(trafficData[key]) % key
+				perfdataString += "%s/s={0:.3f}; ".format(trafficData[key]) % key
 		textOutput = str("OK - " + device + " statistics read: \n")
 		textOutput += outputString.strip(', ') + " | " + perfdataString
 		returnCode = 0

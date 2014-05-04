@@ -47,7 +47,17 @@ class NetstatCurrent:
             return_code = 0
             prefix = 'OK:'
                 
-        print '%(prefix)s Total Connections: %(sum_conns)s, TCP Connections: %(tcp_conns)s, UDP Connections: %(udp_conns)s | total_conns=%(sum_conns)s, tcp_conns=%(tcp_conns)s, udp_conns=%(udp_conns)s' % {'prefix' : prefix, 'sum_conns' : sum_conns, 'tcp_conns' : self.__tcp_conns, 'udp_conns' : self.__udp_conns}
+        
+        values = {'prefix' : prefix, 'sum_conns' : sum_conns,
+                'tcp_conns' : self.__tcp_conns, 'udp_conns' : self.__udp_conns, 
+                'warning' : self.__warning, 'critical' : self.__critical}
+        output = '%(prefix)s Total Connections: \
+%(sum_conns)s;%(warning)s;%(critical)s, \
+TCP Connections: %(tcp_conns)s, UDP Connections: %(udp_conns)s \
+| total_conns=%(sum_conns)s, tcp_conns=%(tcp_conns)s, \
+udp_conns=%(udp_conns)s' % values
+
+        print output
         return return_code
 
 

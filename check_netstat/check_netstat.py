@@ -54,7 +54,7 @@ class NetstatCurrent:
         output = '%(prefix)s Total Connections: \
 %(sum_conns)s, \
 TCP Connections: %(tcp_conns)s, UDP Connections: %(udp_conns)s \
-| total_conns=%(sum_conns)s;%(warning)s;%(critical)s, tcp_conns=%(tcp_conns)s, \
+| total_conns=%(sum_conns)s;%(warning)s;%(critical)s tcp_conns=%(tcp_conns)s \
 udp_conns=%(udp_conns)s' % values
 
         print output

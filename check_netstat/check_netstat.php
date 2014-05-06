@@ -13,6 +13,7 @@ $def[1] .= "CDEF:sum_conns=ds1 ";
 $def[1] .= "CDEF:tcp_conns=ds2 ";
 $def[1] .= "CDEF:udp_conns=ds3 ";
 
+
 $def[1] .= "LINE1:sum_conns" . "#000000" . "FF:\"$NAME[1]\t\" " ;
 $def[1] .= "GPRINT:sum_conns:LAST:\"Cur\\:%8.2lf $UNIT[1]\" ";
 $def[1] .= "GPRINT:sum_conns:AVERAGE:\"Avg\\:%8.2lf $UNIT[1]\" ";
@@ -32,5 +33,11 @@ $def[1] .= "GPRINT:udp_conns:MIN:\"Min\\:%8.2lf $UNIT[3]\" ";
 $def[1] .= "GPRINT:udp_conns:MAX:\"Max\\:%8.2lf $UNIT[3]\\n\" ";
 
 
-?>
+if (isset($WARN[1]) && $WARN[1] != "") {
+	$def[1] .= rrd::hrule("$WARN[1]", "#FFFF00", "warning   " . str_pad($WARN[1], 6, ' ', STR_PAD_LEFT) . "\\n");
+}
 
+if (isset($CRIT[1]) && $CRIT[1] != "") {
+	$def[1] .= rrd::hrule("$CRIT[1]", "#FF0000", "critical  " . str_pad($CRIT[1], 6, ' ', STR_PAD_LEFT). "\\n");
+}
+?>

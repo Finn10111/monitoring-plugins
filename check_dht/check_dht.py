@@ -4,8 +4,8 @@
 # with a DHT22 one wire bus sensor or similar. 
 # Basically it only calls the Adafruit DHT driver and reads
 # out the values.
-# You can get the Adafruit DHT driver at GitHub:
-# https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code
+# You can get the Adafruit DHT module at GitHub:
+# https://github.com/adafruit/Adafruit_Python_DHT
 # 
 # TODO: Use the nagios threshold syntax to make full use
 # of the warning and critical thresholds.
@@ -15,6 +15,7 @@ import subprocess
 import time
 import sys
 import argparse
+import Adafruit_DHT
 
 def main():
 	
@@ -32,35 +33,31 @@ def main():
 	criticalTemp = args.critical.split(',')[0]
 	criticalHum = args.critical.split(',')[1]
 
+	sensor_args = { '11': Adafruit_DHT.DHT11,
+			'22': Adafruit_DHT.DHT22,
+			'2302': Adafruit_DHT.AM2302 }	
 
-	if sensor not in ['11', '22', '2302']:
+	if sensor not in sensor_args:
 		exitCheck(3, 'please select valid sensor (11, 22 or 2302)')
+	else:
+		sensor = sensor_args[sensor]
 
-	# We need this try counter because the sensor sometimes doesn't deliver data.
-	maxTries = 3
-	tryCounter = 0
-	while tryCounter < maxTries:
-		try:
-			temphum = subprocess.Popen(['timeout', '3s', 'Adafruit_DHT', sensor, pin], stdout=subprocess.PIPE).communicate()[0]
-			temp = re.search('^Temp\s*=\s*(\d*\.\d)', temphum, re.M | re.S).group(1)
-			hum = re.search('.*Hum\s*=\s*(\d*\.\d)', temphum, re.M | re.S).group(1)
-			tryCounter = 100
-		except AttributeError as e:
-			tryCounter += 1
-			time.sleep(5)
+	hum, temp = Adafruit_DHT.read_retry(sensor, pin)
+	if not re.match("\d+\.\d+", str(temp)):
+		exitCheck(3, 'could not read temperature and humidity values')
+	hum = round(hum,1)
+	temp = round(temp,1)
 			
 
-	if tryCounter == 100:
-		msg = "Temperature: %s Humidity: %s | temp=%s;%s;%s hum=%s;%s;%s" % (temp, hum, temp, warningTemp, criticalTemp, hum, warningHum, criticalHum)
-		if temp < warningTemp and hum < warningHum:
-			status = 0
-		elif temp < criticalTemp and hum < criticalHum:
-			status = 1
-		else:
-			status = 2
-		exitCheck(status, msg)	
+	msg = "Temperature: %s Humidity: %s | temp=%s;%s;%s hum=%s;%s;%s" % (temp, hum, temp, warningTemp, criticalTemp, hum, warningHum, criticalHum)
+	if temp < warningTemp and hum < warningHum:
+		status = 0
+	elif temp < criticalTemp and hum < criticalHum:
+		status = 1
 	else:
-		exitCheck(3, 'could not read temperature and humidity values')
+		status = 2
+	exitCheck(status, msg)	
+	
 
 
 def exitCheck(status, msg=''):

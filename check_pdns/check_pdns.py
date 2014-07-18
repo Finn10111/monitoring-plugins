@@ -15,8 +15,8 @@ class PowerDNSStats:
     __data = dict()
 
     def __init__(self, warning=False, critical=False):
-        self.__warning = int(warning)
-        self.__critical = int(critical)
+        self.__warning = float(warning)
+        self.__critical = float(critical)
 
     def __is_first_run(self):
 	if not os.path.isfile(self.__store_path):
@@ -50,11 +50,14 @@ class PowerDNSStats:
         diff = new_values
         timediff = int(new_values['timeLastCheck']) - int(old_values['timeLastCheck'])
         for key in new_values:
-            diff_value = (float(new_values[key]) - float(old_values[key])) / timediff
-            if diff_value >= 0 and diff != False:
-                diff[key] = diff_value
-            else:
-                diff = False
+            try:
+                diff_value = (float(new_values[key]) - float(old_values[key])) / timediff
+                if diff_value >= 0 and diff != False:
+                    diff[key] = diff_value
+                else:
+                    diff = False
+            except ZeroDivisionError as e:
+                diff = 'TooFast'
         return diff
 
 
@@ -85,33 +88,45 @@ class PowerDNSStats:
 
 
     def __exit__(self, diff=False):
+        return_code = 0
+        prefix = "OK: "
         if diff == False:
             return_code = 3
-            prefix = "UNKNOWN:"
-            output = prefix + ' Collecting data for first time run'
+            prefix = "UNKNOWN: "
+            output = prefix + 'Collecting data for first time run'
+        elif diff == "TooFast":
+            return_code = 3
+            prefix = "UNKNOWN: "
+            output = prefix + 'Check can not be executed twice a second'
         else:
-            return_code = 0
-            prefix = "OK:"
-            output = prefix + " statistics read | "
+            # check if thresholds are set
+            if self.__warning != False and self.__critical != False:
+                # check for critical
+                if diff['corrupt-packets'] >= self.__critical or diff['servfail-packets'] >= self.__critical or diff['timedout-packets'] >= self.__critical:
+                    return_code = 2
+                    prefix = "CRITICAL: "
+                # check for warning
+                elif diff['corrupt-packets'] >= self.__warning or diff['servfail-packets'] >= self.__warning or diff['timedout-packets'] >= self.__warning:
+                    return_code = 1
+                    prefix = "WARNING: "
 
+            
+            output = prefix + 'Error rates: %.3f/s servfail-packets, %.3f/s corrupt-packets, %.3f/s timedout-packets, Statistics: %.3f/s recursing-questions, %.3f/s recursing-answers, %.3f/s packetcache-hit, %.3f/s packetcache-miss, %.3f/s query-cache-hit, %.3f/s query-cache-miss' % (diff['servfail-packets'], diff['corrupt-packets'], diff['timedout-packets'], diff['recursing-questions'], diff['recursing-answers'], diff['packetcache-hit'], diff['packetcache-miss'], diff['query-cache-hit'], diff['query-cache-miss']) + ' | '
             for key in diff:
                 if key != 'timeLastCheck':
                     output += key + '=' + '%.3f' % diff[key] + ' '
 
-
         print output
         return return_code
-
-
 
 
 def main():
     parser = argparse.ArgumentParser(description = 'Nagios plugin to check pdns statistics')
     thresholds = parser.add_argument_group('thresholds', 'warning and critical thresholds for total number of connections')
     thresholds.add_argument('-w', '--warning', required=False, default=False,
-            type=int)
+            type=float, help='treshold for errors per second')
     thresholds.add_argument('-c', '--critical', required=False, default=False,
-            type=int)
+            type=float, help='treshold for errors per second')
     args = parser.parse_args()
 
     powerdns_stats = PowerDNSStats(args.warning, args.critical)

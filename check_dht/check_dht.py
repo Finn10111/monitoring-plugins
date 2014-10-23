@@ -50,12 +50,13 @@ def main():
 			
 
 	msg = "Temperature: %s Humidity: %s | temp=%s;%s;%s hum=%s;%s;%s" % (temp, hum, temp, warningTemp, criticalTemp, hum, warningHum, criticalHum)
-	if temp < warningTemp and hum < warningHum:
-		status = 0
-	elif temp < criticalTemp and hum < criticalHum:
+
+	if temp > float(criticalTemp) or hum > float(criticalHum):
+		status = 2
+	elif temp > float(warningTemp) or hum > float(warningHum):
 		status = 1
 	else:
-		status = 2
+		status = 0
 	exitCheck(status, msg)	
 	
 

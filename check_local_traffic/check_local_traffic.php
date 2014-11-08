@@ -11,12 +11,12 @@ $colors['in_area'] = "#7FFF7F";
  
 foreach ($DS as $i) 
 {
-	if( preg_match('/^rx_bytes_s$/', $NAME[$defcnt])) 
+	if( preg_match('/^bits_in_s$/', $NAME[$defcnt])) 
 	{ 
 		#$defcntin = $defcnt-1;
 		$ds_name[$defcnt] = "Traffic";
  
-		$opt[$defcnt] = "--vertical-label \"Byte/s\" --title \"Traffic\" ";
+		$opt[$defcnt] = "--vertical-label \"Bit/s\" --title \"Traffic\" ";
 		$def[$defcnt] = "";
 		$def[$defcnt] .= rrd::hrule("0", "#888888");
 		$def[$defcnt] .= rrd::def("in", $RRDFILE[$defcnt], $DS[$defcnt], "AVERAGE"); 
@@ -27,7 +27,7 @@ foreach ($DS as $i)
 		$defcntout = 1;
 		foreach ($DS as $j)
 		{
-			if( preg_match('/^tx_bytes_s$/', $NAME[$defcntout]) ) 
+			if( preg_match('/^bits_out_s$/', $NAME[$defcntout]) ) 
 			{
 				$def[$defcnt] .= rrd::def("out", $RRDFILE[$defcntout], $DS[$defcntout], "AVERAGE"); 
 				$def[$defcnt] .= rrd::cdef("out_neg", "out,-1,*");

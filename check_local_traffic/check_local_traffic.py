@@ -41,6 +41,7 @@ import os
 import shelve
 import time
 import argparse
+import math
 
 
 class PluginData:
@@ -100,7 +101,7 @@ def processData(device):
 		return False
 
 	deltaTime = time.time() - trafficDataOld['timeLastCheck']
-	trafficDataOutput = dict()	
+	trafficDataOutput = dict()
 
 	# if last value seems incorrect... can happen after reboot
 	if	trafficDataOld['rx_bytes'] > trafficDataNew['rx_bytes'] or \
@@ -112,7 +113,7 @@ def processData(device):
 	else:
 		for key in trafficDataNew:
 			trafficDataOutput[key] = (int(trafficDataNew[key]) - int(trafficDataOld[key])) / deltaTime
-	
+
 	trafficData.setData()
 	return trafficDataOutput
 
@@ -122,14 +123,11 @@ def doCheck(device):
 	trafficData = processData(device)
 
 	if trafficData is not False:
-		outputString = "statistics read successfully"
-		perfdataString = ""
-		for key in sorted(trafficData):
-			if key != "timeLastCheck":
-				#outputString += "%s/s {0:.3f}, ".format(trafficData[key]) % key
-				perfdataString += "%s/s={0:.3f}; ".format(trafficData[key]) % key
-		textOutput = str("OK - " + device + " statistics read: \n")
-		textOutput += outputString.strip(', ') + " | " + perfdataString
+		perfdataString  = "bits_in/s={0:.3f};".format(trafficData['rx_bytes']*8)
+		perfdataString += " bits_out/s={0:.3f};".format(trafficData['tx_bytes']*8)
+                textOutput = "OK - %s in: %s - out: %s | %s" % (device,
+                        formatBits(trafficData['rx_bytes']),
+                        formatBits(trafficData['tx_bytes']), perfdataString)
 		returnCode = 0
 	else:
 		textOutput = 'UNKNOWN - device ' + device + ' not found'
@@ -138,6 +136,14 @@ def doCheck(device):
 	print(textOutput)
 	return returnCode
 
+def formatBits(value):
+    output = value * 8
+    size_names = ["bit/s", "kbit/s", "Mbit/s", "Gbit/s"]
+    i = 0
+    while output > 1024:
+        output = output / 1024
+        i += 1
+    return "{0:.3f};".format(output) + " " + size_names[i]
 
 
 if __name__ == '__main__':

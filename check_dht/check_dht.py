@@ -28,10 +28,10 @@ def main():
 
 	sensor = args.sensor
 	pin = args.pin
-	warningTemp = args.warning.split(',')[0]
-	warningHum = args.warning.split(',')[1]
-	criticalTemp = args.critical.split(',')[0]
-	criticalHum = args.critical.split(',')[1]
+	warningTemp = float(args.warning.split(',')[0])
+	warningHum = float(args.warning.split(',')[1])
+	criticalTemp = float(args.critical.split(',')[0])
+	criticalHum = float(args.critical.split(',')[1])
 
 	sensor_args = { '11': Adafruit_DHT.DHT11,
 			'22': Adafruit_DHT.DHT22,
@@ -50,10 +50,9 @@ def main():
 			
 
 	msg = "Temperature: %s Humidity: %s | temp=%s;%s;%s hum=%s;%s;%s" % (temp, hum, temp, warningTemp, criticalTemp, hum, warningHum, criticalHum)
-
-	if temp > float(criticalTemp) or hum > float(criticalHum):
+	if temp > criticalTemp or hum > criticalHum:
 		status = 2
-	elif temp > float(warningTemp) or hum > float(warningHum):
+	elif temp > warningTemp or hum > warningHum:
 		status = 1
 	else:
 		status = 0

@@ -11,12 +11,14 @@ class PowerDNSStats:
     __warning = False
     __critical = False
     __store_path = '/tmp/check_pdns'
-    __values = ['packetcache-hit', 'packetcache-miss', 'query-cache-hit', 'query-cache-miss', 'recursing-answers', 'recursing-questions', 'corrupt-packets', 'servfail-packets', 'timedout-packets', 'udp-queries']
+    __values = ['packetcache-hit', 'packetcache-miss', 'query-cache-hit', 'query-cache-miss', 'recursing-answers', 'recursing-questions', 'corrupt-packets', 'servfail-packets', 'timedout-packets', 'udp-queries', 'tcp-queries']
     __data = dict()
 
-    def __init__(self, warning=False, critical=False):
+    def __init__(self, warning=False, critical=False, warningerr=False, criticalerr=False):
         self.__warning = float(warning)
         self.__critical = float(critical)
+        self.__warningerr = float(warningerr)
+        self.__criticalerr = float(criticalerr)
 
     def __is_first_run(self):
 	if not os.path.isfile(self.__store_path):
@@ -100,18 +102,18 @@ class PowerDNSStats:
             output = prefix + 'Check can not be executed twice a second'
         else:
             # check if thresholds are set
-            if self.__warning != False and self.__critical != False:
+            if self.__warningerr != False and self.__criticalerr != False:
                 # check for critical
-                if diff['corrupt-packets'] >= self.__critical or diff['servfail-packets'] >= self.__critical or diff['timedout-packets'] >= self.__critical:
+                if diff['corrupt-packets'] >= self.__criticalerr or diff['servfail-packets'] >= self.__criticalerr or diff['timedout-packets'] >= self.__criticalerr or (diff['udp-queries'] + diff['tcp-queries']) >= self.__critical:
                     return_code = 2
                     prefix = "CRITICAL: "
                 # check for warning
-                elif diff['corrupt-packets'] >= self.__warning or diff['servfail-packets'] >= self.__warning or diff['timedout-packets'] >= self.__warning:
+                elif diff['corrupt-packets'] >= self.__warningerr or diff['servfail-packets'] >= self.__warningerr or diff['timedout-packets'] >= self.__warningerr or (diff['udp-queries'] + diff['tcp-queries']) >= self.__warning:
                     return_code = 1
                     prefix = "WARNING: "
 
             
-            output = prefix + 'Error rates: %.3f/s servfail-packets, %.3f/s corrupt-packets, %.3f/s timedout-packets, Statistics: %.3f/s recursing-questions, %.3f/s recursing-answers, %.3f/s packetcache-hit, %.3f/s packetcache-miss, %.3f/s query-cache-hit, %.3f/s query-cache-miss' % (diff['servfail-packets'], diff['corrupt-packets'], diff['timedout-packets'], diff['recursing-questions'], diff['recursing-answers'], diff['packetcache-hit'], diff['packetcache-miss'], diff['query-cache-hit'], diff['query-cache-miss']) + ' | '
+            output = prefix + 'Queries: %.3f/s udp-queries, %.3f/s tcp-queries, Error rates: %.3f/s servfail-packets, %.3f/s corrupt-packets, %.3f/s timedout-packets, Cache: %.3f/s packetcache-hit, %.3f/s packetcache-miss, %.3f/s query-cache-hit, %.3f/s query-cache-miss, Recursor: %.3f/s recursing-questions, %.3f/s recursing-answers' % (diff['udp-queries'], diff['tcp-queries'], diff['servfail-packets'], diff['corrupt-packets'], diff['timedout-packets'], diff['packetcache-hit'], diff['packetcache-miss'], diff['query-cache-hit'], diff['query-cache-miss'], diff['recursing-questions'], diff['recursing-answers']) + ' | '
             for key in diff:
                 if key != 'timeLastCheck':
                     output += key + '=' + '%.3f' % diff[key] + ' '
@@ -121,15 +123,20 @@ class PowerDNSStats:
 
 
 def main():
-    parser = argparse.ArgumentParser(description = 'Nagios plugin to check pdns statistics')
-    thresholds = parser.add_argument_group('thresholds', 'warning and critical thresholds for total number of connections')
+    parser = argparse.ArgumentParser(description = 'Nagios plugin for monitoring PowerDNS')
+    thresholds = parser.add_argument_group('query thresholds', 'warning and critical thresholds for queries per second')
     thresholds.add_argument('-w', '--warning', required=False, default=False,
-            type=float, help='treshold for errors per second')
+            type=float, help='treshold for queries per second')
     thresholds.add_argument('-c', '--critical', required=False, default=False,
-            type=float, help='treshold for errors per second')
+            type=float, help='treshold for queries per second')
+    err_thresholds = parser.add_argument_group('error thresholds', 'warning and critical thresholds for errors per second')
+    err_thresholds.add_argument('-W', '--warningerr', required=False, default=False,
+            type=float, help='treshold for some kind of errors per second')
+    err_thresholds.add_argument('-C', '--criticalerr', required=False, default=False,
+            type=float, help='treshold for some kind of errors per second')
     args = parser.parse_args()
 
-    powerdns_stats = PowerDNSStats(args.warning, args.critical)
+    powerdns_stats = PowerDNSStats(args.warning, args.critical, args.warningerr, args.criticalerr)
     return powerdns_stats.run()
 
 

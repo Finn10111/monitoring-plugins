@@ -103,16 +103,24 @@ class PowerDNSStats:
         else:
             # check if thresholds are set
             if self.__warningerr != False and self.__criticalerr != False:
-                # check for critical
-                if diff['corrupt-packets'] >= self.__criticalerr or diff['servfail-packets'] >= self.__criticalerr or diff['timedout-packets'] >= self.__criticalerr or (diff['udp-queries'] + diff['tcp-queries']) >= self.__critical:
+                # check for critical errors
+                if diff['corrupt-packets'] >= self.__criticalerr or diff['servfail-packets'] >= self.__criticalerr or diff['timedout-packets'] >= self.__criticalerr:
                     return_code = 2
                     prefix = "CRITICAL: "
-                # check for warning
-                elif diff['corrupt-packets'] >= self.__warningerr or diff['servfail-packets'] >= self.__warningerr or diff['timedout-packets'] >= self.__warningerr or (diff['udp-queries'] + diff['tcp-queries']) >= self.__warning:
+                # check for warning errors
+                elif diff['corrupt-packets'] >= self.__warningerr or diff['servfail-packets'] >= self.__warningerr or diff['timedout-packets'] >= self.__warningerr:
+                    return_code = 1
+                    prefix = "WARNING: "
+            if self.__warning != False and self.__critical != False:
+                # check for critical query count
+                if (diff['udp-queries'] + diff['tcp-queries']) >= self.__critical:
+                    return_code = 2
+                    prefix = "CRITICAL: "
+                # check for warning query count
+                elif (diff['udp-queries'] + diff['tcp-queries']) >= self.__warning and return_code == 0:
                     return_code = 1
                     prefix = "WARNING: "
 
-            
             output = prefix + 'Queries: %.3f/s udp-queries, %.3f/s tcp-queries, Error rates: %.3f/s servfail-packets, %.3f/s corrupt-packets, %.3f/s timedout-packets, Cache: %.3f/s packetcache-hit, %.3f/s packetcache-miss, %.3f/s query-cache-hit, %.3f/s query-cache-miss, Recursor: %.3f/s recursing-questions, %.3f/s recursing-answers' % (diff['udp-queries'], diff['tcp-queries'], diff['servfail-packets'], diff['corrupt-packets'], diff['timedout-packets'], diff['packetcache-hit'], diff['packetcache-miss'], diff['query-cache-hit'], diff['query-cache-miss'], diff['recursing-questions'], diff['recursing-answers']) + ' | '
             for key in diff:
                 if key != 'timeLastCheck':

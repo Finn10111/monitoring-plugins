@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+# You have to add these two lines with visudo to get this plugin working:
+# Defaults:nrpe    !requiretty
+# nrpe  ALL=NOPASSWD: /usr/bin/pdns_control
+# The plugin stores some data in /tmp/check_pdns, if you have run it as a user
+# which is not the monitoring user you have to delete the file so the
+# monitoring user can read/write the file.
 import sys
 import re
 import os

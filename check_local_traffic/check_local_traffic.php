@@ -23,11 +23,11 @@ foreach ($DS as $i)
 		$def[$defcnt] .= rrd::area("in", $colors['in_area']);
 		$def[$defcnt] .= rrd::line1("in", $colors['in'], "in") ;
                 $def[$defcnt] .= rrd::gprint("in", array("LAST", "MIN", "MAX", "AVERAGE"), "%4.2lf %s");
-                if ( isset($WARN[$defcnt]) )
+                if ( isset($WARN[$defcnt]) && $WARN[$defcnt] != '' )
                 {
                     $def[$defcnt] .= rrd::hrule($WARN[$defcnt], "#FFFF00");
                 }
-                if ( isset($CRIT[$defcnt]) )
+                if ( isset($CRIT[$defcnt]) && $CRIT[$defcnt] != '' )
                 {
                     $def[$defcnt] .= rrd::hrule($CRIT[$defcnt], "#FF0000");
                 }
@@ -42,11 +42,11 @@ foreach ($DS as $i)
 				$def[$defcnt] .= rrd::area("out_neg", $colors['out_area']);
                                 $def[$defcnt] .= rrd::line1("out_neg", $colors['out'], "out") ;
                                 $def[$defcnt] .= rrd::gprint("out", array("LAST", "MIN", "MAX", "AVERAGE"), "%4.2lf %s");
-                                if ( isset($WARN[$defcnt]) )
+                                if ( isset($WARN[$defcnt]) && $WARN[$defcnt] != '' )
                                 {
                                     $def[$defcnt] .= rrd::hrule($WARN[$defcnt]*-1, "#FFFF00");
                                 }
-                                if ( isset($CRIT[$defcnt]) )
+                                if ( isset($CRIT[$defcnt]) && $CRIT[$defcnt] != '' )
                                 {
                                     $def[$defcnt] .= rrd::hrule($CRIT[$defcnt]*-1, "#FF0000");
                                 }

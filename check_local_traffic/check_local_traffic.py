@@ -84,7 +84,7 @@ def getStoredData(device):
     return pluginData
 
 
-def doCheck(device):
+def doCheck(device, warning, critical):
     if os.path.isdir(statsPath % device):
         trafficDataOld = getStoredData(device)
         trafficDataNew = getCurrentData(device)
@@ -109,14 +109,34 @@ def doCheck(device):
         setData(device, trafficDataNew)
 
         if trafficData is not False:
-            perfdataString = "bits_in/s={0:.3f};". \
-            format(trafficData['rx_bytes']*8)
-            perfdataString += " bits_out/s={0:.3f};". \
-            format(trafficData['tx_bytes']*8)
-            textOutput = "OK - %s in: %s - out: %s | %s" % \
-            (device, formatBits(trafficData['rx_bytes']),
-                formatBits(trafficData['tx_bytes']), perfdataString)
-            returnCode = 0
+            bits_in = trafficData['rx_bytes']*8
+            bits_out = trafficData['tx_bytes']*8
+
+            if warning and critical:
+                if bits_in < warning and bits_out < warning:
+                    returnCode = 0
+                    prefix = "OK"
+                elif bits_in < critical and bits_out < critical:
+                    returnCode = 1
+                    prefix = "WARNING"
+                else:
+                    returnCode = 2
+                    prefix = "CRITICAL"
+                thresholds = "%s;%s;" % (warning, critical)
+            else:
+                returnCode = 0
+                prefix = "OK"
+                thresholds = ''
+
+            perfdataString = "bits_in/s={0:.3f};%s".format(bits_in) % \
+                thresholds
+            perfdataString += " bits_out/s={0:.3f};%s".format(bits_out) % \
+                thresholds
+            textOutput = " - %s in: %s - out: %s | %s" % \
+                (device, formatBits(bits_in), formatBits(bits_out),
+                    perfdataString)
+
+            textOutput = prefix + textOutput
         else:
             textOutput = 'UNKNOWN - device ' + device + ' not found'
             returnCode = 3
@@ -128,7 +148,7 @@ def doCheck(device):
 
 
 def formatBits(value):
-    output = value * 8
+    output = value
     size_names = ["bit/s", "kbit/s", "Mbit/s", "Gbit/s"]
     i = 0
     while output > 1024:
@@ -144,13 +164,34 @@ def deviceExists(device):
     return exists
 
 
+def readThresholds(value):
+    if re.match('\d+k', value):
+        plain_value = int(value[0:-1]) * 1024
+    elif re.match('\d+M', value):
+        plain_value = int(value[0:-1]) * 1024*1024
+    elif re.match('\d+G', value):
+        plain_value = int(value[0:-1]) * 1024*1024*1024
+    else:
+        plain_value = value
+    return plain_value
+
+
 def main():
     parser = argparse.ArgumentParser(description='Nagios plugin to check \
             traffic usage')
     parser.add_argument('-d', '--device', required=True)
+    thresholds = parser.add_argument_group('thresholds',
+                                           'warning and critical thresholds \
+                                            (k, M, G may be used)')
+    thresholds.add_argument('-w', '--warning', default=False)
+    thresholds.add_argument('-c', '--critical', default=False)
+
     args = parser.parse_args()
+    if args.warning and args.critical:
+        args.warning = readThresholds(args.warning)
+        args.critical = readThresholds(args.critical)
     if args.device is not None:
-        returnCode = doCheck(args.device)
+        returnCode = doCheck(args.device, args.warning, args.critical)
     else:
         returnCode = 3
 

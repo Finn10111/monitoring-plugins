@@ -41,17 +41,17 @@ $def[2] .= "GPRINT:servfail-packets:AVERAGE:\"Avg\\:%8.2lf $UNIT[1]\" ";
 $def[2] .= "GPRINT:servfail-packets:MIN:\"Min\\:%8.2lf $UNIT[1]\" ";
 $def[2] .= "GPRINT:servfail-packets:MAX:\"Max\\:%8.2lf $UNIT[1]\\n\" ";
 
-$def[2] .= "LINE1:corrupt-packets" . "#00FF00" . "FF:\"$NAME[9]\t\" " ;
-$def[2] .= "GPRINT:corrupt-packets:LAST:\"Cur\\:%8.2lf $UNIT[9]\" ";
-$def[2] .= "GPRINT:corrupt-packets:AVERAGE:\"Avg\\:%8.2lf $UNIT[9]\" ";
-$def[2] .= "GPRINT:corrupt-packets:MIN:\"Min\\:%8.2lf $UNIT[9]\" ";
-$def[2] .= "GPRINT:corrupt-packets:MAX:\"Max\\:%8.2lf $UNIT[9]\\n\" ";
+$def[2] .= "LINE1:corrupt-packets" . "#00FF00" . "FF:\"$NAME[10]\t\" " ;
+$def[2] .= "GPRINT:corrupt-packets:LAST:\"Cur\\:%8.2lf $UNIT[10]\" ";
+$def[2] .= "GPRINT:corrupt-packets:AVERAGE:\"Avg\\:%8.2lf $UNIT[10]\" ";
+$def[2] .= "GPRINT:corrupt-packets:MIN:\"Min\\:%8.2lf $UNIT[10]\" ";
+$def[2] .= "GPRINT:corrupt-packets:MAX:\"Max\\:%8.2lf $UNIT[10]\\n\" ";
 
-$def[2] .= "LINE1:timedout-packets" . "#0000FF" . "FF:\"$NAME[10]\t\" " ;
-$def[2] .= "GPRINT:timedout-packets:LAST:\"Cur\\:%8.2lf $UNIT[10]\" ";
-$def[2] .= "GPRINT:timedout-packets:AVERAGE:\"Avg\\:%8.2lf $UNIT[10]\" ";
-$def[2] .= "GPRINT:timedout-packets:MIN:\"Min\\:%8.2lf $UNIT[10]\" ";
-$def[2] .= "GPRINT:timedout-packets:MAX:\"Max\\:%8.2lf $UNIT[10]\\n\" ";
+$def[2] .= "LINE1:timedout-packets" . "#0000FF" . "FF:\"$NAME[9]\t\" " ;
+$def[2] .= "GPRINT:timedout-packets:LAST:\"Cur\\:%8.2lf $UNIT[9]\" ";
+$def[2] .= "GPRINT:timedout-packets:AVERAGE:\"Avg\\:%8.2lf $UNIT[9]\" ";
+$def[2] .= "GPRINT:timedout-packets:MIN:\"Min\\:%8.2lf $UNIT[9]\" ";
+$def[2] .= "GPRINT:timedout-packets:MAX:\"Max\\:%8.2lf $UNIT[9]\\n\" ";
 
 
 $opt[3] = '';

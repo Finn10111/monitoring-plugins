@@ -57,25 +57,25 @@ def main():
         warningTempLow, warningTempHigh = warningTemp.split(':')
         if temp < float(warningTempLow) or temp > float(warningTempHigh):
             status = 1
-    elif temp > warningTemp:
+    elif temp > float(warningTemp):
             status = 1
     if re.match('\d+:\d+', warningHum):
         warningHumLow, warningHumHigh = warningHum.split(':')
         if hum < float(warningHumLow) or hum > float(warningHumHigh):
             status = 1
-    elif hum > warningHum:
+    elif hum > float(warningHum):
             status = 1
     if re.match('\d+:\d+', criticalTemp):
         criticalTempLow, criticalTempHigh = criticalTemp.split(':')
         if temp < float(criticalTempLow) or temp > float(criticalTempHigh):
             status = 2
-    elif temp > criticalTemp:
+    elif temp > float(criticalTemp):
             status = 2
     if re.match('\d+:\d+', criticalHum):
         criticalHumLow, criticalHumHigh = criticalHum.split(':')
         if hum < float(criticalHumLow) or hum > float(criticalHumHigh):
             status = 2
-    elif hum > criticalHum:
+    elif hum > float(criticalHum):
             status = 2
 
     exitCheck(status, msg)

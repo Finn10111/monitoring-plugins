@@ -7,8 +7,10 @@
 # You can get the Adafruit DHT module at GitHub:
 # https://github.com/adafruit/Adafruit_Python_DHT
 #
-# TODO: Use the nagios threshold syntax to make full use
-# of the warning and critical thresholds.
+# This plugin needs to be run with sudo. For getting this working with
+# nagios, nrpe or something similiar, run visudo or add a file in
+# /etc/sudoers.d/ an add for example this line:
+# nagios ALL=(ALL) NOPASSWD: /usr/local/lib/nagios/plugins/check_dht.py
 
 import re
 import subprocess

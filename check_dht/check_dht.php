@@ -27,7 +27,7 @@ $def[1] .= "GPRINT:temp:MAX:\"Max\\:%8.2lf $UNIT[1]\\n\" ";
 $opt[2] = '';
 $def[2] = '';
 
-$opt[2] .= " --imgformat=PNG --title=\" $hostname / " . $this->MACRO['DISP_SERVICEDESC'] . "\" --base=1024 --vertical-label=\"$vertlabel\" --slope-mode -l 0 ";
+$opt[2] .= " --imgformat=PNG --title=\" $hostname / " . $this->MACRO['DISP_SERVICEDESC'] . "\" --base=1024 --vertical-label=\"$vertlabel\" --slope-mode -l 0 -u 100";
 
 $def[2] .= "DEF:ds1=$RRDFILE[2]:$DS[2]:AVERAGE " ;
 $def[2] .= "CDEF:hum=ds1 ";

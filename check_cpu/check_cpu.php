@@ -15,25 +15,25 @@ $def[1]	.= rrd::def('irq', $RRDFILE[6], $DS[6], 'AVERAGE');
 $def[1]	.= rrd::def('softirq', $RRDFILE[7], $DS[7], 'AVERAGE');
 
 $def[1] .= rrd::area('system', '#9f40ff', 'system  ', true );
-$def[1] .= rrd::gprint('system', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf %S' );
+$def[1] .= rrd::gprint('system', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf' );
 
 $def[1] .= rrd::area('user', '#40ffff', 'user    ', true );
-$def[1] .= rrd::gprint('user', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf %S' );
+$def[1] .= rrd::gprint('user', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf' );
 
 $def[1] .= rrd::area('nice', '#9fff40', 'nice    ', true );
-$def[1] .= rrd::gprint('nice', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf %S' );
+$def[1] .= rrd::gprint('nice', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf' );
 
 $def[1] .= rrd::area('iowait', '#ff4040', 'iowait  ', true );
-$def[1] .= rrd::gprint('iowait', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf %S' );
+$def[1] .= rrd::gprint('iowait', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf' );
 
 $def[1] .= rrd::area('irq', '#ffc440', 'irq     ', true );
-$def[1] .= rrd::gprint('irq', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf %S' );
+$def[1] .= rrd::gprint('irq', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf' );
 
 $def[1] .= rrd::area('softirq', '#ff40dc', 'softirq ', true );
-$def[1] .= rrd::gprint('softirq', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf %S' );
+$def[1] .= rrd::gprint('softirq', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf' );
 
 $def[1] .= rrd::area('idle', '#ffffff', 'idle    ', true );
-$def[1] .= rrd::gprint('idle', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf %S' );
+$def[1] .= rrd::gprint('idle', array('LAST', 'MIN', 'MAX', 'AVERAGE'), '%5.2lf' );
 
 # warning and critial thresholds not implemented in check yet
  

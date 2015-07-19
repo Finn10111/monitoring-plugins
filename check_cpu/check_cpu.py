@@ -60,10 +60,12 @@ def exitCheck(cpustat, warning, critical):
         elif total_usage > warning and warning is not None:
             status = WARNING
             prefix = 'WARNING'
-        output = """: CPU usage - user %(user)s%%, nice %(nice)s%%, system %(system)s%%, \
-idle %(idle)s%%, iowait %(iowait)s%%, irq %(irq)s%%, softirq \
-%(softirq)s%% | user=%(user)s nice=%(nice)s system=%(system)s \
-idle=%(idle)s iowait=%(iowait)s irq=%(irq)s softirq=%(softirq)s""" % cpustat
+        output = """: CPU usage - user %(user)s%%, nice %(nice)s%%, \
+system %(system)s%%, idle %(idle)s%%, iowait %(iowait)s%%, irq %(irq)s%%, \
+softirq %(softirq)s%%, steal %(steal)s%%, guest %(guest)s%%, guest_nice \
+%(guest_nice)s%%| user=%(user)s nice=%(nice)s system=%(system)s \
+idle=%(idle)s iowait=%(iowait)s irq=%(irq)s softirq=%(softirq)s \
+steal=%(steal)s guest=%(guest)s guest_nice=%(guest_nice)s """ % cpustat
     print prefix + output
     return status
 
@@ -77,6 +79,9 @@ def getCpu(cpustat=dict()):
     cpustat['iowait'] = 0
     cpustat['irq'] = 0
     cpustat['softirq'] = 0
+    cpustat['steal'] = 0
+    cpustat['guest'] = 0
+    cpustat['guest_nice'] = 0
 
     try:
         cpu = open(stat_path).readlines()
@@ -86,13 +91,20 @@ def getCpu(cpustat=dict()):
     for line in cpu:
         if (re.match('^cpu.*', line)):
             line = re.sub('\s{1,}', ' ', line)
-            cpustat['user'] = cpustat['user'] + int(line.split()[1])
-            cpustat['nice'] = cpustat['nice'] + int(line.split()[2])
-            cpustat['system'] = cpustat['system'] + int(line.split()[3])
-            cpustat['idle'] = cpustat['idle'] + int(line.split()[4])
-            cpustat['iowait'] = cpustat['iowait'] + int(line.split()[5])
-            cpustat['irq'] = cpustat['irq'] + int(line.split()[6])
-            cpustat['softirq'] = cpustat['softirq'] + int(line.split()[7])
+            values = line.split()
+            cpustat['user'] = cpustat['user'] + int(values[1])
+            cpustat['nice'] = cpustat['nice'] + int(values[2])
+            cpustat['system'] = cpustat['system'] + int(values[3])
+            cpustat['idle'] = cpustat['idle'] + int(values[4])
+            cpustat['iowait'] = cpustat['iowait'] + int(values[5])
+            cpustat['irq'] = cpustat['irq'] + int(values[6])
+            cpustat['softirq'] = cpustat['softirq'] + int(values[7])
+            if len(values) > 9:
+                cpustat['steal'] = cpustat['steal'] + int(values[8])
+            if len(values) > 10:
+                cpustat['guest'] = cpustat['guest'] + int(values[9])
+            if len(values) > 11:
+                cpustat['guest_nice'] = cpustat['guest_nice'] + int(values[10])
     return cpustat
 
 

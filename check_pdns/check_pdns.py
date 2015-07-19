@@ -28,8 +28,8 @@ class PowerDNSStats:
 
     def __is_first_run(self):
 	if not os.path.isfile(self.__store_path):
-	    self.__getData()
-	    self.__setData()
+            self.__getData()
+            self.__setData()
             return True
         else:
             return False

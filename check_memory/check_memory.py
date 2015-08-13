@@ -1,4 +1,17 @@
 #!/usr/bin/python2
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 import sys
 import re
@@ -14,25 +27,25 @@ def main():
         crit = helper.options.critical
 
 	memory = getMemory()
-	
-        
+
+
 	if helper.options.warning is not None:
 		warn = helper.options.warning
 		if re.match('.*%$', warn):
 			warn = str(memory['total'] * int(re.search('\d*', warn).group(0)) / 100)
-	else: 
+	else:
 		warn = '0'
-	 
+
 	if helper.options.critical is not None:
 		crit = helper.options.critical
 		if re.match('.*%$', crit):
 			crit = str(memory['total'] * int(re.search('\d*', crit).group(0)) / 100)
-	else: 
+	else:
 		crit = '0'
 
         helper.status(ok)
 	status = "OK"
-        
+
 	if memory['totalfree'] <= int(warn):
 		helper.status(warning)
 		status = "WARNING"
@@ -58,16 +71,16 @@ def main():
 def getMemory():
         try:
 		memory = open('/proc/meminfo').read()
-		total = int(re.search('(MemTotal:)(\s*)(\d*)', memory, re.M).group(3)) * 1000 
-		free = int(re.search('(MemFree:)(\s*)(\d*)', memory, re.M).group(3)) * 1000 
-		buffers = int(re.search('(Buffers:)(\s*)(\d*)', memory, re.M).group(3)) * 1000 
-		cached = int(re.search('(Cached:)(\s*)(\d*)', memory, re.M).group(3)) * 1000 
+		total = int(re.search('(MemTotal:)(\s*)(\d*)', memory, re.M).group(3)) * 1000
+		free = int(re.search('(MemFree:)(\s*)(\d*)', memory, re.M).group(3)) * 1000
+		buffers = int(re.search('(Buffers:)(\s*)(\d*)', memory, re.M).group(3)) * 1000
+		cached = int(re.search('(Cached:)(\s*)(\d*)', memory, re.M).group(3)) * 1000
 		swapcached = int(re.search('(SwapCached:)(\s*)(\d*)', memory, re.M).group(3)) * 1000
 		used = total - free - buffers - cached
-		totalfree = total - used 
+		totalfree = total - used
         except Exception, e:
                 helper.exit(summary='Could not read /proc/meminfo', long_output=str(e), exit_code=unknown, perfdata='')
-	
+
 	return dict({'total': total, 'used': used ,'free': free, 'totalfree': totalfree, 'buffers': buffers, 'cached': cached, 'swapcached': swapcached})
 
 

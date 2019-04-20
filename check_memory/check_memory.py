@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -12,78 +12,78 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 import sys
 import re
-from pynag.Plugins import PluginHelper,ok,warning,critical,unknown
+import argparse
+
 
 def main():
-        helper = PluginHelper()
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('-w', '--warning', required=False, type=int,
+                        help='warning in %')
+    parser.add_argument('-c', '--critical', required=False, type=int,
+                        help='ctitical in %')
+    args = parser.parse_args()
 
-        helper.parser.add_option('-w', help='warning free (X% or XM)', dest='warning')
-        helper.parser.add_option('-c', help='critical free (X% or XM)', dest='critical')
-        helper.parse_arguments()
-        warn = helper.options.warning
-        crit = helper.options.critical
+    warning = args.warning
+    critical = args.critical
 
-	memory = getMemory()
+    memory = getMemory()
 
+    status = "OK"
+    exit_code = 0
 
-	if helper.options.warning is not None:
-		warn = helper.options.warning
-		if re.match('.*%$', warn):
-			warn = str(memory['total'] * int(re.search('\d*', warn).group(0)) / 100)
-	else:
-		warn = '0'
+    if memory['totalfree'] <= warning:
+        exit_code = 1
+        status = "WARNING"
 
-	if helper.options.critical is not None:
-		crit = helper.options.critical
-		if re.match('.*%$', crit):
-			crit = str(memory['total'] * int(re.search('\d*', crit).group(0)) / 100)
-	else:
-		crit = '0'
+    if memory['totalfree'] <= critical:
+        exit_code = 2
+        status = "CRITICAL"
 
-        helper.status(ok)
-	status = "OK"
-
-	if memory['totalfree'] <= int(warn):
-		helper.status(warning)
-		status = "WARNING"
-
-	if memory['totalfree'] <= int(crit):
-		helper.status(critical)
-		status = "CRITICAL"
-
-	helper.add_summary(status + ': Memory free: %(totalfree)s %% (%(free)s %% including buffers/cached)' % {'totalfree': (round((float(memory['totalfree']) / float(memory['total']) * 100), 1 )), 'free': (round((float(memory['free']) / float(memory['total']) * 100), 1 ))})
-        helper.add_metric(label='total',value=memory['total'])
-        helper.add_metric(label='free',value=memory['free'])
-        helper.add_metric(label='totalfree',value=memory['totalfree'], warn=warn+'..0', crit=crit+'..0')
-        helper.add_metric(label='used',value=memory['used'])
-        helper.add_metric(label='buffers',value=memory['buffers'])
-        helper.add_metric(label='cached',value=memory['cached'])
-        helper.add_metric(label='swapcached',value=memory['swapcached'])
-
-
-	helper.check_all_metrics()
-        helper.exit()
+    totalfree = round((memory['totalfree'] / memory['total'] * 100), 1)
+    free = round((memory['free'] / memory['total'] * 100), 1)
+    status_values = {
+            'totalfree': totalfree,
+            'free': free
+        }
+    status_text = ': Memory free: %(totalfree)s %% \
+(%(free)s %% including buffers/cached)' % status_values
+    status += status_text
+    print(status)
+    return exit_code
 
 
 def getMemory():
-        try:
-		memory = open('/proc/meminfo').read()
-		total = int(re.search('(MemTotal:)(\s*)(\d*)', memory, re.M).group(3)) * 1000
-		free = int(re.search('(MemFree:)(\s*)(\d*)', memory, re.M).group(3)) * 1000
-		buffers = int(re.search('(Buffers:)(\s*)(\d*)', memory, re.M).group(3)) * 1000
-		cached = int(re.search('(Cached:)(\s*)(\d*)', memory, re.M).group(3)) * 1000
-		swapcached = int(re.search('(SwapCached:)(\s*)(\d*)', memory, re.M).group(3)) * 1000
-		used = total - free - buffers - cached
-		totalfree = total - used
-        except Exception, e:
-                helper.exit(summary='Could not read /proc/meminfo', long_output=str(e), exit_code=unknown, perfdata='')
+    try:
+        memory = open('/proc/meminfo').read()
+        total = int(re.search(r'(MemTotal:)(\s*)(\d*)', memory,
+                              re.M).group(3)) * 1000
+        free = int(re.search(r'(MemFree:)(\s*)(\d*)', memory,
+                             re.M).group(3)) * 1000
+        buffers = int(re.search(r'(Buffers:)(\s*)(\d*)', memory,
+                                re.M).group(3)) * 1000
+        cached = int(re.search(r'(Cached:)(\s*)(\d*)', memory,
+                               re.M).group(3)) * 1000
+        swapcached = int(re.search(r'(SwapCached:)(\s*)(\d*)', memory,
+                                   re.M).group(3)) * 1000
+        used = total - free - buffers - cached
+        totalfree = float(total - used)
+    except Exception:
+        print("UNKNOWN Could not read /proc/meminfo")
+        sys.exit(3)
 
-	return dict({'total': total, 'used': used ,'free': free, 'totalfree': totalfree, 'buffers': buffers, 'cached': cached, 'swapcached': swapcached})
+    memory_values = {
+        'total': total,
+        'used': used,
+        'free': free,
+        'totalfree': totalfree,
+        'buffers': buffers,
+        'cached': cached,
+        'swapcached': swapcached
+    }
+    return memory_values
 
 
 if __name__ == '__main__':
-        sys.exit(main())
-
+    sys.exit(main())

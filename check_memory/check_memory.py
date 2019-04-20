@@ -20,9 +20,9 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-w', '--warning', required=False, type=int,
-                        help='warning in %')
+                        help='warning in %', default=20)
     parser.add_argument('-c', '--critical', required=False, type=int,
-                        help='ctitical in %')
+                        help='ctitical in %', default=10)
     args = parser.parse_args()
 
     warning = args.warning
@@ -50,7 +50,10 @@ def main():
     status_text = ': Memory free: %(totalfree)s %% \
 (%(free)s %% including buffers/cached)' % status_values
     status += status_text
-    print(status)
+    performance_data = ' | total=%(total)s free=%(free)s \
+totalfree=%(totalfree)s used=%(used)s buffers=%(buffers)s \
+cached=%(cached)s swapcached=%(swapcached)s' % memory
+    print(status + performance_data)
     return exit_code
 
 

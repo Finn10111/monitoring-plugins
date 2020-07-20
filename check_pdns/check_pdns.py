@@ -31,7 +31,7 @@ class PowerDNSStats:
     __warning = False
     __critical = False
     __store_path = '/tmp/check_pdns'
-    __values = ['packetcache-hit', 'packetcache-miss', 'query-cache-hit', 'query-cache-miss', 'recursing-answers', 'recursing-questions', 'corrupt-packets', 'servfail-packets', 'timedout-packets', 'udp-queries', 'tcp-queries']
+    __values = ['packetcache-hit', 'packetcache-miss', 'query-cache-hit', 'query-cache-miss', 'recursing-answers', 'recursing-questions', 'corrupt-packets', 'servfail-packets', 'timedout-packets', 'udp-queries', 'tcp-queries', 'qsize-q']
     __data = dict()
 
     def __init__(self, warning=False, critical=False, warningerr=False, criticalerr=False):

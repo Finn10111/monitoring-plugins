@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -68,10 +68,10 @@ def exitCheck(cpustat, warning, critical):
         status = OK
         prefix = 'OK'
         total_usage = 100 - cpustat['idle']
-        if total_usage > critical and critical is not None:
+        if critical is not None and total_usage > critical:
             status = CRITICAL
             prefix = 'CRITICAL'
-        elif total_usage > warning and warning is not None:
+        elif warning is not None and total_usage > warning:
             status = WARNING
             prefix = 'WARNING'
         output = """: CPU usage - user %(user)s%%, nice %(nice)s%%, \
@@ -80,7 +80,7 @@ softirq %(softirq)s%%, steal %(steal)s%%, guest %(guest)s%%, guest_nice \
 %(guest_nice)s%%| user=%(user)s nice=%(nice)s system=%(system)s \
 idle=%(idle)s iowait=%(iowait)s irq=%(irq)s softirq=%(softirq)s \
 steal=%(steal)s guest=%(guest)s guest_nice=%(guest_nice)s """ % cpustat
-    print prefix + output
+    print(prefix + output)
     return status
 
 
@@ -99,7 +99,7 @@ def getCpu(cpustat=dict()):
 
     try:
         cpu = open(stat_path).readlines()
-    except Exception, e:
+    except Exception as e:
         return False
 
     for line in cpu:
@@ -124,9 +124,9 @@ def getCpu(cpustat=dict()):
 
 def convertToPercentage(cpustat):
     complete = 0
-    for data in cpustat.iteritems():
+    for data in cpustat.items():
         complete += data[1]
-    for value in cpustat.iteritems():
+    for value in cpustat.items():
         cpustat[value[0]] = round(float(value[1]) / complete, 4) * 100
 
     return cpustat

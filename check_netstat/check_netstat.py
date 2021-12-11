@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ import sys
 import re
 import subprocess
 import argparse
+
 
 class NetstatCurrent:
     __tcp_conns = 0
@@ -61,7 +62,6 @@ class NetstatCurrent:
             return_code = 0
             prefix = 'OK:'
 
-
         values = {'prefix' : prefix, 'sum_conns' : sum_conns,
                 'tcp_conns' : self.__tcp_conns, 'udp_conns' : self.__udp_conns,
                 'warning' : self.__warning, 'critical' : self.__critical}
@@ -71,41 +71,41 @@ TCP Connections: %(tcp_conns)s, UDP Connections: %(udp_conns)s \
 | total_conns=%(sum_conns)s;%(warning)s;%(critical)s tcp_conns=%(tcp_conns)s \
 udp_conns=%(udp_conns)s' % values
 
-        print output
+        print(output)
         return return_code
 
 
     def __process_netstat_output__(self, netstat_output):
-        netstat_list = netstat_output.split('\n')
+        netstat_list = netstat_output.split(b'\n')
         for line in netstat_list:
-            tmp = re.split('\s*', line)
-            if re.match('tcp', tmp[0]):
+            tmp = re.split(b'\s+', line)
+            if re.match(b'tcp', tmp[0]):
                 self.__tcp_conns += 1
-                if re.match('ESTABLISHED', tmp[5]):
+                if re.match(b'ESTABLISHED', tmp[5]):
                     self.__tcp_conns_established += 1
-                elif re.match('SYN_SENT', tmp[5]):
+                elif re.match(b'SYN_SENT', tmp[5]):
                     self.__tcp_conns_syn_sent += 1
-                elif re.match('SYN_RECV', tmp[5]):
+                elif re.match(b'SYN_RECV', tmp[5]):
                     self.__tcp_conns_syn_recv += 1
-                elif re.match('FIN_WAIT1', tmp[5]):
+                elif re.match(b'FIN_WAIT1', tmp[5]):
                     self.__tcp_conns_fin_wait1 += 1
-                elif re.match('FIN_WAIT2', tmp[5]):
+                elif re.match(b'FIN_WAIT2', tmp[5]):
                     self.__tcp_conns_fin_wait2 += 1
-                elif re.match('TIME_WAIT', tmp[5]):
+                elif re.match(b'TIME_WAIT', tmp[5]):
                     self.__tcp_conns_time_wait += 1
-                elif re.match('CLOSE', tmp[5]):
+                elif re.match(b'CLOSE', tmp[5]):
                     self.__tcp_conns_close += 1
-                elif re.match('CLOSE_WAIT', tmp[5]):
+                elif re.match(b'CLOSE_WAIT', tmp[5]):
                     self.__tcp_conns_close_wait += 1
-                elif re.match('LAST_ACK', tmp[5]):
+                elif re.match(b'LAST_ACK', tmp[5]):
                     self.__tcp_conns_last_ack += 1
-                elif re.match('LISTEN', tmp[5]):
+                elif re.match(b'LISTEN', tmp[5]):
                     self.__tcp_conns_listen += 1
-                elif re.match('CLOSING', tmp[5]):
+                elif re.match(b'CLOSING', tmp[5]):
                     self.__tcp_conns_closing += 1
-                elif re.match('UNKNOWN', tmp[5]):
+                elif re.match(b'UNKNOWN', tmp[5]):
                     self.__tcp_conns_unknown += 1
-            elif re.match('udp', tmp[0]):
+            elif re.match(b'udp', tmp[0]):
                 self.__udp_conns += 1
 
         return self.__exit__()

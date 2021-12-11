@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -103,7 +103,7 @@ def exitCheck(status, msg=''):
         msg = 'CRITICAL - ' + msg
     elif status == 3:
         msg = 'UNKNOWN - ' + msg
-    print msg
+    print(msg)
     sys.exit(status)
 
 

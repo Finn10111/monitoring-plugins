@@ -133,7 +133,7 @@ def convertToPercentage(cpustat):
 
 
 def getDiff(cpustat, old_cpustat):
-    for value in cpustat.iteritems():
+    for value in cpustat.items():
         cpustat[value[0]] = cpustat[value[0]] - old_cpustat[value[0]]
     return cpustat
 

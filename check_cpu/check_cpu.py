@@ -74,12 +74,13 @@ def exitCheck(cpustat, warning, critical):
         elif warning is not None and total_usage > warning:
             status = WARNING
             prefix = 'WARNING'
-        output = """: CPU usage - user %(user)s%%, nice %(nice)s%%, \
-system %(system)s%%, idle %(idle)s%%, iowait %(iowait)s%%, irq %(irq)s%%, \
-softirq %(softirq)s%%, steal %(steal)s%%, guest %(guest)s%%, guest_nice \
-%(guest_nice)s%%| user=%(user)s nice=%(nice)s system=%(system)s \
-idle=%(idle)s iowait=%(iowait)s irq=%(irq)s softirq=%(softirq)s \
-steal=%(steal)s guest=%(guest)s guest_nice=%(guest_nice)s """ % cpustat
+        output = """: CPU usage - user {user:.2f}%, nice {nice:.2f}%, \
+system {system:.2f}%, idle {idle:.2f}%, iowait {iowait:.2f}%, irq {irq:.2f}%, \
+softirq {softirq:.2f}%, steal {steal:.2f}%, guest {guest:.2f}%, guest_nice \
+{guest_nice:.2f}%| user={user:.2f} nice={nice:.2f} system={system:.2f} \
+idle={idle:.2f} iowait={iowait:.2f} irq={irq:.2f} softirq={softirq:.2f} \
+steal={steal:.2f} guest={guest:.2f} guest_nice={guest_nice:.2f} """ \
+    .format(**cpustat)
     print(prefix + output)
     return status
 

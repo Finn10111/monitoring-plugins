@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 """
     check_local_traffic.py - simple nagios plugin to check traffic on linux
     hosts
@@ -46,8 +46,8 @@ def getCurrentData(device):
         data[key] = int(open('%s%s' % (statsPath % device, key)).read())
     data['timeLastCheck'] = time.time()
 
-    if not os.path.isfile(storePath % device):
-        data = getCurrentData(device)
+    if not os.path.isfile((storePath + '.db') % device) and not os.path.isfile(storePath  % device):
+        data = getCurrentData(device)  # recursion!?
         setData(device, data)
     data = dict()
     try:
